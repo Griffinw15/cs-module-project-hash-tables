@@ -1,3 +1,5 @@
+from linked_list import *
+
 class HashTableEntry:
     """
     Linked List hash table key/value pair
@@ -21,6 +23,9 @@ class HashTable:
     """
 
     def __init__(self, capacity):
+        self.capacity = capacity
+        self.load = 0
+        self.storage = [None for i in range(capacity)]
         # Your code here
 
 
@@ -34,6 +39,8 @@ class HashTable:
 
         Implement this.
         """
+        #return len(capacity)
+        return self.capacity
         # Your code here
 
 
@@ -43,6 +50,8 @@ class HashTable:
 
         Implement this.
         """
+        #load_factor = number_of_items / number_of_slots_in_array
+        return self.load / self.capacity
         # Your code here
 
 
@@ -62,6 +71,10 @@ class HashTable:
 
         Implement this, and/or FNV-1.
         """
+        hash = 5381
+        for i in key:
+            hash = (hash*33) + ord(i)
+        return hash
         # Your code here
 
 
@@ -81,6 +94,21 @@ class HashTable:
 
         Implement this.
         """
+        index = self.hash_index(key)
+        if not self.storage[index]:
+            self.storage[index] = HashTableEntry(key, value)
+            self.load += 1
+        else:
+            current = self.storage[i]
+            while current.key != key and current.next:
+                current = current.next
+            if current.key == key:
+                current.value = value
+            else:
+                current.next  = HashTableEntry(key, value)
+                self.load += 1
+        if self.get_load_factor() > 0.7:
+            self.resize(self.capacity*2)
         # Your code here
 
 
@@ -92,6 +120,30 @@ class HashTable:
 
         Implement this.
         """
+        index = self.hash_index(key)
+
+        current = self.storage[index]
+
+        if not current:
+            print('Error')
+        
+        elif not current.next:
+            self.storage[index] = None
+            self.load -= 1
+        
+        else:
+            previous = None
+
+            while current.key != key and current.next:
+                previous, current = current, current.next
+
+            if not current.next:
+                previous.next = None
+                self.load -= 1
+
+            else:
+                previous.next = current.next
+                self.load -= 1
         # Your code here
 
 
@@ -103,6 +155,14 @@ class HashTable:
 
         Implement this.
         """
+        index = self.hash_index(key)
+
+        current = self.storage[index]
+
+        if current == key:
+            return current.value
+        else:
+            return None
         # Your code here
 
 
@@ -113,6 +173,16 @@ class HashTable:
 
         Implement this.
         """
+        new_table = HashTable(new_capacity)
+
+        for i in self.storage:
+            current = i
+            while current:
+                new_table.put(current.key, current.value)
+                current = current.next
+            self.capacity = new_table.capacity
+            self.load = new_table.load
+            self.storage = new_table.storage
         # Your code here
 
 
